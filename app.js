@@ -59,7 +59,7 @@ async function fetchRemoteData() {
       if (Array.isArray(users) && users.length > 0) {
         users.forEach(function(u) {
           const existing = state.persons.find(function(p) {
-            return p.uid === u.uid || p.id === u.id;
+            return p.id === u.id || (u.uid && p.uid && p.uid === u.uid);
           });
           if (!existing) {
             state.persons.push({
