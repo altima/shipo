@@ -1,4 +1,4 @@
-const CACHE_NAME = "aida-order-v2";
+const CACHE_NAME = "aida-order-v3";
 const FILES_TO_CACHE = [
   "/",
   "/index.html",
@@ -29,6 +29,12 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
   event.respondWith(
-    caches.match(event.request).then(resp => resp || fetch(event.request))
+    fetch(event.request)
+      .then(response => {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
