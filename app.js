@@ -49,12 +49,13 @@ async function fetchRemoteData() {
         meals.forEach(function(m) {
           const existing = state.meals.find(function(x) { return x.id === m.id; });
           if (!existing) {
-            state.meals.push(m);
+            state.meals.push(Object.assign({}, m, { builtin: true }));
           } else {
-            existing.name  = m.name  || existing.name;
-            existing.price = m.price != null ? m.price : existing.price;
-            existing.cat   = m.cat   || existing.cat;
-            existing.icon  = m.icon  || existing.icon;
+            existing.name    = m.name  || existing.name;
+            existing.price   = m.price != null ? m.price : existing.price;
+            existing.cat     = m.cat   || existing.cat;
+            existing.icon    = m.icon  || existing.icon;
+            existing.builtin = true;
           }
         });
         updated = true;
@@ -75,14 +76,16 @@ async function fetchRemoteData() {
           });
           if (!existing) {
             state.persons.push({
-              id:   u.id   || ("p" + Date.now() + Math.floor(Math.random()*9999)),
-              name: u.name || "Unbekannt",
-              uid:  u.uid  || null
+              id:      u.id   || ("p" + Date.now() + Math.floor(Math.random()*9999)),
+              name:    u.name || "Unbekannt",
+              uid:     u.uid  || null,
+              builtin: true
             });
           } else {
             if (u.id && !existing.id)   existing.id   = u.id;
             if (u.name)                 existing.name = u.name;
             if (u.uid)                  existing.uid  = u.uid;
+            existing.builtin = true;
           }
         });
         updated = true;
@@ -162,6 +165,8 @@ function addPerson(name) {
 }
 
 function deletePerson(id) {
+  var p = state.persons.find(function(p) { return p.id === id; });
+  if (p && p.builtin) { toast("Vordefinierte Personen können nicht gelöscht werden."); return; }
   state.persons = state.persons.filter(function(p) { return p.id !== id; });
   if (currentPersonId === id) {
     currentPersonId = null;
@@ -189,6 +194,8 @@ function addMeal(name, price, cat, icon) {
 }
 
 function deleteMeal(id) {
+  var m = state.meals.find(function(m) { return m.id === id; });
+  if (m && m.builtin) { toast("Vordefinierte Artikel k\u00f6nnen nicht gel\u00f6scht werden."); return; }
   state.meals = state.meals.filter(function(m) { return m.id !== id; });
   save();
   renderCatBar();
@@ -384,7 +391,7 @@ function renderPersonList() {
         "<div class=\"admin-item-sub\">ID: " + p.id + (p.uid ? " \u00B7 UID: " + p.uid : "") + "</div>" +
       "</div>" +
       "<button class=\"btn-secondary btn-small\" onclick=\"openOrderHistory('" + p.id + "')\">📋</button>" +
-      "<button class=\"btn-danger btn-small\" onclick=\"deletePerson('" + p.id + "')\">&#x2715;</button>";
+      (!p.builtin ? "<button class=\"btn-danger btn-small\" onclick=\"deletePerson('" + p.id + "')\">&#x2715;</button>" : "");
     list.appendChild(el);
   });
 }
@@ -404,7 +411,7 @@ function renderMealList() {
         "<div class=\"admin-item-name\">" + (m.icon || "") + " " + m.name + "</div>" +
         "<div class=\"admin-item-sub\">" + m.cat + " \u00B7 " + m.price.toFixed(2).replace(".", ",") + " \u20AC</div>" +
       "</div>" +
-      "<button class=\"btn-danger btn-small\" onclick=\"deleteMeal('" + m.id + "')\">&#x2715;</button>";
+      (!m.builtin ? "<button class=\"btn-danger btn-small\" onclick=\"deleteMeal('" + m.id + "')\">&#x2715;</button>" : "");
     list.appendChild(el);
   });
 }
