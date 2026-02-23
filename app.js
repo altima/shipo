@@ -154,7 +154,6 @@ function undoLastOrder() {
 function addPerson(name) {
   state.persons.push({ id: "p" + Date.now(), name: name.trim(), uid: null });
   save();
-  renderUserGrid();
   renderAdmin();
 }
 
@@ -165,7 +164,6 @@ function deletePerson(id) {
     updateCurrentUserInfo();
   }
   save();
-  renderUserGrid();
   renderAdmin();
 }
 
@@ -1068,7 +1066,6 @@ document.getElementById("nfcLinkStart").onclick = async function() {
         person.uid = uid;
         save();
         renderAdmin();
-        renderUserGrid();
         statusEl.textContent = "✔ " + person.name + " → UID: " + uid;
         statusEl.className = "nfc-link-status success";
         toast("📡 " + person.name + " mit Karte " + uid + " verknüpft");
