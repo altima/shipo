@@ -44,15 +44,19 @@
       <button id="nfcStopBtn" class="nfc-stop-btn">✕</button>
     </div>
 
-    <!-- User selection -->
-    <section class="card" id="userSection">
-      <h2 class="section-title">👤 Person wählen</h2>
-      <div id="userGrid" class="user-grid"></div>
-      <p id="currentUserInfo" class="status-text">Keine Person ausgewählt.</p>
-    </section>
+    <!-- Person / NFC -->
+    <div class="scan-bar">
+      <button id="scanCardBtn" class="btn-scan">� Karte scannen</button>
+      <div id="currentUserInfo" class="scan-person-info">Keine Person ausgewählt.</div>
+    </div>
 
     <!-- Category tabs -->
     <div class="cat-bar" id="catBar"></div>
+
+    <!-- Meal search -->
+    <div class="meal-search-wrap">
+      <input id="mealSearch" class="meal-search-input" type="search" placeholder="🔍 Artikel suchen…" autocomplete="off">
+    </div>
 
     <!-- Item grid -->
     <section class="item-section">

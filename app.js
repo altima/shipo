@@ -46,7 +46,17 @@ async function fetchRemoteData() {
     if (r.ok) {
       const meals = await r.json();
       if (Array.isArray(meals) && meals.length > 0) {
-        state.meals = meals;
+        meals.forEach(function(m) {
+          const existing = state.meals.find(function(x) { return x.id === m.id; });
+          if (!existing) {
+            state.meals.push(m);
+          } else {
+            existing.name  = m.name  || existing.name;
+            existing.price = m.price != null ? m.price : existing.price;
+            existing.cat   = m.cat   || existing.cat;
+            existing.icon  = m.icon  || existing.icon;
+          }
+        });
         updated = true;
       }
     }
@@ -226,40 +236,30 @@ function getCategories() {
 }
 
 let currentCat = null;
+let mealSearchTerm = "";
 
 /* ============================================================
    RENDER: USER GRID
 ============================================================ */
-function renderUserGrid() {
-  const grid = document.getElementById("userGrid");
-  grid.innerHTML = "";
-  state.persons.forEach(function(p) {
-    const btn = document.createElement("button");
-    btn.className = "user-btn" + (p.id === currentPersonId ? " active" : "");
-    btn.textContent = p.name;
-    btn.onclick = function() { selectPerson(p.id); };
-    grid.appendChild(btn);
-  });
-}
-
 function selectPerson(id) {
   currentPersonId = id;
   updateCurrentUserInfo();
-  renderUserGrid();
 }
 
 function updateCurrentUserInfo() {
   const info = document.getElementById("currentUserInfo");
   if (!currentPersonId) {
     info.textContent = "Keine Person ausgewaehlt.";
+    info.className = "scan-person-info";
     return;
   }
   const p = state.persons.find(function(x) { return x.id === currentPersonId; });
-  if (!p) { info.textContent = "Keine Person ausgewaehlt."; return; }
+  if (!p) { info.textContent = "Keine Person ausgewaehlt."; info.className = "scan-person-info"; return; }
   const personOrders = state.orders.filter(function(o) { return o.personId === p.id; });
   const total = personOrders.reduce(function(s, o) { return s + o.total; }, 0);
-  info.textContent = p.name + " \u2014 " + personOrders.length + " Bestellung(en), " +
-    total.toFixed(2).replace(".", ",") + " \u20AC gesamt";
+  info.textContent = "\uD83D\uDC64 " + p.name + " \u2014 " + personOrders.length + " Bestellung(en), " +
+    total.toFixed(2).replace(".", ",") + " \u20AC";
+  info.className = "scan-person-info active";
 }
 
 /* ============================================================
@@ -278,6 +278,8 @@ function renderCatBar() {
     btn.textContent = cat;
     btn.onclick = function() {
       currentCat = cat;
+      mealSearchTerm = "";
+      document.getElementById("mealSearch").value = "";
       renderCatBar();
       renderItemGrid();
     };
@@ -297,9 +299,13 @@ function renderItemGrid() {
   const colorMap = {};
   cats.forEach(function(c, i) { colorMap[c] = CAT_COLORS[i % CAT_COLORS.length]; });
 
-  const items = state.meals.filter(function(m) { return m.cat === currentCat; });
+  const q = mealSearchTerm.trim().toLowerCase();
+  const items = state.meals.filter(function(m) {
+    if (q) return m.name.toLowerCase().includes(q) || (m.cat && m.cat.toLowerCase().includes(q));
+    return m.cat === currentCat;
+  });
   if (items.length === 0) {
-    grid.innerHTML = "<p style='opacity:0.5;font-size:0.9rem;padding:0.5rem;'>Keine Artikel in dieser Kategorie.</p>";
+    grid.innerHTML = "<p style='opacity:0.5;font-size:0.9rem;padding:0.5rem;'>" + (q ? "Keine Treffer." : "Keine Artikel in dieser Kategorie.") + "</p>";
     return;
   }
   items.forEach(function(m) {
@@ -423,7 +429,6 @@ function renderBalanceList() {
    FULL RENDER
 ============================================================ */
 function render() {
-  renderUserGrid();
   renderCatBar();
   renderItemGrid();
   renderLog();
@@ -525,6 +530,14 @@ document.getElementById("reloadDataBtn").onclick = function() {
   toast("Lade Daten...");
   fetchRemoteData();
 };
+
+/* ============================================================
+   MEAL SEARCH
+============================================================ */
+document.getElementById("mealSearch").addEventListener("input", function() {
+  mealSearchTerm = this.value;
+  renderItemGrid();
+});
 
 /* ============================================================
    CLEAR ORDERS BUTTON
@@ -807,7 +820,7 @@ async function startNfcScan() {
   }
 }
 
-document.getElementById("nfcToggleBtn").onclick = function() {
+function nfcToggle() {
   if (!nfcSupported()) {
     toast("NFC wird auf diesem Gerät nicht unterstützt");
     return;
@@ -817,7 +830,10 @@ document.getElementById("nfcToggleBtn").onclick = function() {
   } else {
     startNfcScan();
   }
-};
+}
+
+document.getElementById("nfcToggleBtn").onclick = nfcToggle;
+document.getElementById("scanCardBtn").onclick   = nfcToggle;
 
 document.getElementById("nfcStopBtn").onclick = stopNfcScan;
 
