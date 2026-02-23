@@ -608,7 +608,6 @@ document.querySelectorAll(".modal").forEach(function(modal) {
   function initCanvas() {
     canvas = document.getElementById("sigCanvas");
     ctx = canvas.getContext("2d");
-    resizeCanvas();
   }
 
   function resizeCanvas() {
@@ -667,9 +666,11 @@ document.querySelectorAll(".modal").forEach(function(modal) {
     var person = state.persons.find(function(p) { return p.id === currentPersonId; });
     document.getElementById("sigPersonName").textContent =
       person ? "Bitte unterschreiben: " + person.name : "";
-    clearSig();
-    resizeCanvas();
     document.getElementById("signatureModal").style.display = "flex";
+    requestAnimationFrame(function() {
+      resizeCanvas();
+      clearSig();
+    });
   };
 
   function closeSignatureModal() {
