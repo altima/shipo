@@ -773,6 +773,7 @@ function placeOrderWithSignature(sigDataUrl) {
   state.orders.push(order);
   lastOrderId = order.id;
   cart = [];
+  currentPersonId = null;
   save();
   updateCartBar();
   updateCurrentUserInfo();
