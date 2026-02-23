@@ -1,0 +1,12 @@
+[
+  { "id": "m1", "name": "Pasta",       "price": 3.50, "cat": "Essen",    "icon": "🍝" },
+  { "id": "m2", "name": "Schnitzel",   "price": 4.80, "cat": "Essen",    "icon": "🍽️" },
+  { "id": "m3", "name": "Pommes",      "price": 2.50, "cat": "Essen",    "icon": "🍟" },
+  { "id": "m4", "name": "Wasser",      "price": 1.00, "cat": "Getränke", "icon": "💧" },
+  { "id": "m5", "name": "Cola",        "price": 1.80, "cat": "Getränke", "icon": "🥤" },
+  { "id": "m6", "name": "Bier",        "price": 2.50, "cat": "Getränke", "icon": "🍺" },
+  { "id": "m7", "name": "Saft",        "price": 1.50, "cat": "Getränke", "icon": "🧃" },
+  { "id": "m8", "name": "Keks",        "price": 0.80, "cat": "Snacks",   "icon": "🍪" },
+  { "id": "m9", "name": "Chips",       "price": 1.20, "cat": "Snacks",   "icon": "🥨" },
+  { "id": "m10","name": "Schokolade",  "price": 1.00, "cat": "Snacks",   "icon": "🍫" }
+]

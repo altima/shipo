@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Ship Order</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#1a1a2e">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js");
+    }
+  </script>
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="app-header">
+    <span class="app-title">🚢 Ship Order</span>
+    <div class="header-actions">
+      <button id="undoBtn" class="icon-btn" title="Rückgängig">↩</button>
+      <button id="nfcToggleBtn" class="icon-btn" title="NFC Scan">📡</button>
+      <button id="toggleDark" class="icon-btn" title="Dark Mode">🌙</button>
+    </div>
+  </header>
+
+  <!-- ===== MAIN TABS ===== -->
+  <nav class="tab-bar">
+    <button class="tab-btn active" data-page="order">🛒 Bestellung</button>
+    <button class="tab-btn" data-page="log">📋 Log</button>
+    <button class="tab-btn" data-page="admin">⚙️ Admin</button>
+  </nav>
+
+  <!-- ============================= -->
+  <!-- ======= ORDER PAGE ========== -->
+  <!-- ============================= -->
+  <main class="page active" id="page-order">
+
+    <!-- NFC status banner -->
+    <div id="nfcBanner" class="nfc-banner" style="display:none;">
+      <span id="nfcBannerIcon">📡</span>
+      <span id="nfcBannerText">NFC aktiv – Karte ans Gerät halten</span>
+      <button id="nfcStopBtn" class="nfc-stop-btn">✕</button>
+    </div>
+
+    <!-- User selection -->
+    <section class="card" id="userSection">
+      <h2 class="section-title">👤 Person wählen</h2>
+      <div id="userGrid" class="user-grid"></div>
+      <p id="currentUserInfo" class="status-text">Keine Person ausgewählt.</p>
+    </section>
+
+    <!-- Category tabs -->
+    <div class="cat-bar" id="catBar"></div>
+
+    <!-- Item grid -->
+    <section class="item-section">
+      <div id="itemGrid" class="item-grid"></div>
+    </section>
+
+    <!-- Cart bar (sticky bottom) -->
+    <div class="cart-bar" id="cartBar">
+      <div class="cart-summary">
+        <span id="cartCount">0 Artikel</span>
+        <span id="cartTotal">0,00 €</span>
+      </div>
+      <button class="btn-checkout" id="checkoutBtn">Bestellen ✔</button>
+    </div>
+
+  </main>
+
+  <!-- ============================= -->
+  <!-- ======= LOG PAGE ============ -->
+  <!-- ============================= -->
+  <main class="page" id="page-log">
+    <section class="card">
+      <h2 class="section-title">📋 Buchungs-Log</h2>
+      <div id="logList" class="log-list"></div>
+    </section>
+  </main>
+
+  <!-- ============================= -->
+  <!-- ======= ADMIN PAGE ========== -->
+  <!-- ============================= -->
+  <main class="page" id="page-admin">
+
+    <section class="card">
+      <h2 class="section-title">👥 Personen</h2>
+      <div class="row-gap">
+        <button class="btn-primary" id="addPersonBtn">➕ Person anlegen</button>
+        <button class="btn-secondary" id="nfcScanLinkBtn">📡 NFC verknüpfen</button>
+      </div>
+      <div id="personList" class="admin-list"></div>
+    </section>
+
+    <section class="card">
+      <h2 class="section-title">🍽️ Artikel</h2>
+      <div class="row-gap">
+        <button class="btn-primary" id="addMealBtn">➕ Artikel hinzufügen</button>
+        <button class="btn-secondary" id="reloadDataBtn">🔄 Daten neu laden</button>
+      </div>
+      <div id="mealList" class="admin-list"></div>
+    </section>
+
+    <section class="card">
+      <h2 class="section-title">📊 Salden</h2>
+      <div id="balanceList" class="admin-list"></div>
+    </section>
+
+    <section class="card">
+      <h2 class="section-title">🗑️ Daten</h2>
+      <button class="btn-danger full-width" id="clearOrdersBtn">Alle Bestellungen löschen</button>
+    </section>
+
+  </main>
+
+  <!-- ============================= -->
+  <!-- ======= CHECKOUT MODAL ====== -->
+  <!-- ============================= -->
+  <div id="checkoutModal" class="modal" style="display:none;">
+    <div class="modal-box">
+      <h2>Bestellung bestätigen</h2>
+      <div id="checkoutList" class="checkout-list"></div>
+      <div class="modal-buttons">
+        <button id="modalCancel" class="btn-secondary">Abbrechen</button>
+        <button id="modalConfirm" class="btn-primary">✔ Buchen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================= -->
+  <!-- ======= SIGNATURE MODAL ===== -->
+  <!-- ============================= -->
+  <div id="signatureModal" class="modal" style="display:none;">
+    <div class="modal-box sig-modal-box">
+      <h2>✍️ Unterschrift</h2>
+      <p id="sigPersonName" class="nfc-modal-hint"></p>
+      <div class="sig-canvas-wrap">
+        <canvas id="sigCanvas" class="sig-canvas"></canvas>
+        <div id="sigPlaceholder" class="sig-placeholder">Hier unterschreiben</div>
+      </div>
+      <div class="modal-buttons">
+        <button id="sigClearBtn" class="btn-secondary">🗑 Löschen</button>
+        <button id="sigAcceptBtn" class="btn-primary" disabled>✔ Akzeptieren</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================= -->
+  <!-- ======= NFC LINK MODAL ======= -->
+  <!-- ============================= -->
+  <div id="nfcLinkModal" class="modal" style="display:none;">
+    <div class="modal-box">
+      <h2>📡 NFC-Karte verknüpfen</h2>
+      <p class="nfc-modal-hint">Person wählen, dann Karte ans Gerät halten:</p>
+      <select id="nfcLinkPersonSelect" class="text-input"></select>
+      <div id="nfcLinkStatus" class="nfc-link-status">Bereit…</div>
+      <div class="modal-buttons">
+        <button id="nfcLinkCancel" class="btn-secondary">Abbrechen</button>
+        <button id="nfcLinkStart" class="btn-primary">📡 Scan starten</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================= -->
+  <!-- ======= ADD PERSON MODAL ==== -->
+  <!-- ============================= -->
+  <div id="addPersonModal" class="modal" style="display:none;">
+    <div class="modal-box">
+      <h2>Person anlegen</h2>
+      <input id="newPersonName" class="text-input" type="text" placeholder="Name" autocomplete="off">
+      <div class="modal-buttons">
+        <button id="addPersonCancel" class="btn-secondary">Abbrechen</button>
+        <button id="addPersonConfirm" class="btn-primary">Anlegen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================= -->
+  <!-- ======= ADD MEAL MODAL ====== -->
+  <!-- ============================= -->
+  <div id="addMealModal" class="modal" style="display:none;">
+    <div class="modal-box">
+      <h2>Artikel hinzufügen</h2>
+      <input id="newMealName" class="text-input" type="text" placeholder="Name" autocomplete="off">
+      <input id="newMealPrice" class="text-input" type="number" placeholder="Preis (€)" step="0.10" min="0">
+      <input id="newMealCat" class="text-input" type="text" placeholder="Kategorie (z.B. Essen)" autocomplete="off">
+      <input id="newMealIcon" class="text-input" type="text" placeholder="Icon (Emoji)" autocomplete="off">
+      <div class="modal-buttons">
+        <button id="addMealCancel" class="btn-secondary">Abbrechen</button>
+        <button id="addMealConfirm" class="btn-primary">Hinzufügen</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
