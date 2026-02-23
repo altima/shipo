@@ -381,6 +381,7 @@ function renderPersonList() {
         "<div class=\"admin-item-name\">" + p.name + "</div>" +
         "<div class=\"admin-item-sub\">ID: " + p.id + (p.uid ? " \u00B7 UID: " + p.uid : "") + "</div>" +
       "</div>" +
+      "<button class=\"btn-secondary btn-small\" onclick=\"openOrderHistory('" + p.id + "')\">📋</button>" +
       "<button class=\"btn-danger btn-small\" onclick=\"deletePerson('" + p.id + "')\">&#x2715;</button>";
     list.appendChild(el);
   });
@@ -595,6 +596,114 @@ document.getElementById("clearOrdersBtn").onclick = function() {
   renderAdmin();
   toast("Alle Bestellungen geloescht");
 };
+
+/* ============================================================
+   ORDER HISTORY MODAL
+============================================================ */
+(function() {
+  var ohOrders = [];
+  var ohIndex  = 0;
+  var swipeStartX = 0;
+
+  function fmt(isoStr) {
+    var d = new Date(isoStr);
+    return d.toLocaleDateString("de-DE", { day:"2-digit", month:"2-digit", year:"2-digit" }) +
+      " " + d.toLocaleTimeString("de-DE", { hour:"2-digit", minute:"2-digit" });
+  }
+
+  function buildSlide(order) {
+    var itemsHtml = order.items.map(function(i) {
+      return "<div class=\"oh-item\">" +
+        "<span>" + (i.icon || "") + " " + i.qty + "\u00D7 " + i.name + "</span>" +
+        "<span>" + (i.price * i.qty).toFixed(2).replace(".", ",") + " \u20AC</span>" +
+      "</div>";
+    }).join("");
+
+    var sigHtml = order.signature
+      ? "<img class=\"oh-sig\" src=\"" + order.signature + "\" alt=\"Unterschrift\">"
+      : "<div class=\"oh-sig-missing\">Keine Unterschrift</div>";
+
+    var slide = document.createElement("div");
+    slide.className = "oh-slide";
+    slide.innerHTML =
+      "<div class=\"oh-slide-time\">" + fmt(order.time) + "</div>" +
+      "<div class=\"oh-items\">" + itemsHtml + "</div>" +
+      "<div class=\"oh-total\">" +
+        "<span>Gesamt</span>" +
+        "<span>" + order.total.toFixed(2).replace(".", ",") + " \u20AC</span>" +
+      "</div>" +
+      "<div class=\"oh-sig-wrap\">" + sigHtml + "</div>";
+    return slide;
+  }
+
+  function goTo(idx) {
+    ohIndex = Math.max(0, Math.min(ohOrders.length - 1, idx));
+    var track = document.getElementById("ohTrack");
+    track.style.transform = "translateX(-" + (ohIndex * 100) + "%)";
+    document.getElementById("ohPager").textContent =
+      ohOrders.length > 0 ? (ohIndex + 1) + " / " + ohOrders.length : "";
+    document.getElementById("ohPrev").disabled = ohIndex === 0;
+    document.getElementById("ohNext").disabled = ohIndex === ohOrders.length - 1;
+  }
+
+  window.openOrderHistory = function(personId) {
+    var person = state.persons.find(function(p) { return p.id === personId; });
+    if (!person) return;
+    ohOrders = state.orders
+      .filter(function(o) { return o.personId === personId; })
+      .sort(function(a, b) { return new Date(b.time) - new Date(a.time); });
+
+    document.getElementById("ohTitle").textContent =
+      "\uD83D\uDCC4 " + person.name + " \u2014 " + ohOrders.length + " Bestellung(en)";
+
+    var track = document.getElementById("ohTrack");
+    track.innerHTML = "";
+    track.style.transition = "none";
+    track.style.transform  = "translateX(0)";
+
+    if (ohOrders.length === 0) {
+      var empty = document.createElement("div");
+      empty.className = "oh-slide oh-empty";
+      empty.textContent = "Keine Bestellungen vorhanden.";
+      track.appendChild(empty);
+    } else {
+      ohOrders.forEach(function(o) { track.appendChild(buildSlide(o)); });
+    }
+
+    document.getElementById("orderHistoryModal").style.display = "flex";
+    requestAnimationFrame(function() {
+      track.style.transition = "";
+      goTo(0);
+    });
+  };
+
+  function closeOH() {
+    document.getElementById("orderHistoryModal").style.display = "none";
+  }
+
+  document.getElementById("ohClose").onclick = closeOH;
+  document.getElementById("ohPrev").onclick  = function() { goTo(ohIndex - 1); };
+  document.getElementById("ohNext").onclick  = function() { goTo(ohIndex + 1); };
+
+  document.getElementById("orderHistoryModal").addEventListener("click", function(e) {
+    if (e.target === document.getElementById("orderHistoryModal")) closeOH();
+  });
+
+  var track = document.getElementById("ohTrack");
+  track.addEventListener("touchstart", function(e) {
+    swipeStartX = e.touches[0].clientX;
+  }, { passive: true });
+  track.addEventListener("touchend", function(e) {
+    var dx = e.changedTouches[0].clientX - swipeStartX;
+    if (Math.abs(dx) > 40) goTo(dx < 0 ? ohIndex + 1 : ohIndex - 1);
+  }, { passive: true });
+
+  track.addEventListener("mousedown", function(e) { swipeStartX = e.clientX; });
+  track.addEventListener("mouseup",   function(e) {
+    var dx = e.clientX - swipeStartX;
+    if (Math.abs(dx) > 40) goTo(dx < 0 ? ohIndex + 1 : ohIndex - 1);
+  });
+})();
 
 /* ============================================================
    UNDO BUTTON

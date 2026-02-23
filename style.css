@@ -572,6 +572,133 @@ button { touch-action: manipulation; }
 }
 
 /* ============================================================
+   ORDER HISTORY MODAL
+============================================================ */
+.oh-modal-box {
+  max-width: 520px;
+  padding-bottom: 1rem;
+}
+
+.oh-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.oh-title {
+  font-size: 1rem;
+  font-weight: 700;
+  flex: 1;
+}
+
+.oh-pager {
+  font-size: 0.85rem;
+  opacity: 0.55;
+  white-space: nowrap;
+}
+
+.oh-track-wrap {
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  margin-bottom: 0.75rem;
+}
+
+.oh-track {
+  display: flex;
+  transition: transform 0.28s ease;
+  cursor: grab;
+  user-select: none;
+}
+
+.oh-track:active { cursor: grabbing; }
+
+.oh-slide {
+  min-width: 100%;
+  padding: 0.85rem;
+  box-sizing: border-box;
+}
+
+.oh-empty {
+  opacity: 0.5;
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.oh-slide-time {
+  font-size: 0.78rem;
+  opacity: 0.55;
+  margin-bottom: 0.5rem;
+}
+
+.oh-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.oh-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.oh-item:last-child { border-bottom: none; }
+
+.oh-total {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 0.4rem 0 0.5rem;
+  border-top: 2px solid var(--border);
+}
+
+.oh-sig-wrap {
+  margin-top: 0.5rem;
+}
+
+.oh-sig {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #fff;
+  display: block;
+}
+
+.oh-sig-missing {
+  font-size: 0.8rem;
+  opacity: 0.4;
+  font-style: italic;
+  text-align: center;
+  padding: 0.4rem 0;
+}
+
+.oh-nav {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.oh-nav-btn {
+  flex: 1;
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 0.6rem;
+}
+
+.oh-nav-btn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+/* ============================================================
    SIGNATURE MODAL
 ============================================================ */
 .sig-modal-box {
