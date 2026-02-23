@@ -152,7 +152,11 @@ function undoLastOrder() {
    PERSONS
 ============================================================ */
 function addPerson(name) {
-  state.persons.push({ id: "p" + Date.now(), name: name.trim(), uid: null });
+  var maxNum = state.persons.reduce(function(max, p) {
+    var m = p.id && p.id.match(/^u(\d+)$/);
+    return m ? Math.max(max, parseInt(m[1], 10)) : max;
+  }, 0);
+  state.persons.push({ id: "u" + (maxNum + 1), name: name.trim(), uid: null });
   save();
   renderAdmin();
 }
