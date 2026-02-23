@@ -494,9 +494,10 @@ document.getElementById("addPersonCancel").onclick = function() {
 document.getElementById("addPersonConfirm").onclick = function() {
   const name = document.getElementById("newPersonName").value.trim();
   if (!name) { toast("Bitte einen Namen eingeben!"); return; }
-  addPerson(name);
   document.getElementById("addPersonModal").style.display = "none";
+  addPerson(name);
   toast("Person angelegt: " + name);
+  document.getElementById("newPersonName").value = "";
 };
 document.getElementById("newPersonName").addEventListener("keydown", function(e) {
   if (e.key === "Enter") document.getElementById("addPersonConfirm").click();
