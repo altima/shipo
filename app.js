@@ -543,6 +543,47 @@ document.getElementById("mealSearch").addEventListener("input", function() {
 });
 
 /* ============================================================
+   DEBUG: PERSON SELECT (non-touch / desktop)
+============================================================ */
+(function() {
+  var isTouchDevice = ("ontouchstart" in window) || navigator.maxTouchPoints > 0;
+  if (isTouchDevice) return;
+
+  var wrap = document.getElementById("debugSelect");
+  wrap.style.display = "flex";
+
+  function populateDebugSelect() {
+    var sel = document.getElementById("debugPersonSelect");
+    var prev = sel.value;
+    sel.innerHTML = "";
+    state.persons.forEach(function(p) {
+      var opt = document.createElement("option");
+      opt.value = p.id;
+      opt.textContent = p.name;
+      sel.appendChild(opt);
+    });
+    if (prev && Array.from(sel.options).some(function(o) { return o.value === prev; })) {
+      sel.value = prev;
+    }
+  }
+
+  var _origRender = render;
+  render = function() {
+    _origRender();
+    populateDebugSelect();
+  };
+
+  populateDebugSelect();
+
+  document.getElementById("debugSelectBtn").onclick = function() {
+    var id = document.getElementById("debugPersonSelect").value;
+    if (!id) return;
+    selectPerson(id);
+    toast("🖥 Debug: " + state.persons.find(function(p) { return p.id === id; }).name + " ausgewählt");
+  };
+})();
+
+/* ============================================================
    CLEAR ORDERS BUTTON
 ============================================================ */
 document.getElementById("clearOrdersBtn").onclick = function() {

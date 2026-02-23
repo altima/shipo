@@ -232,6 +232,32 @@ h2 { margin: 0 0 0.75rem 0; font-size: 1rem; font-weight: 700; }
 }
 
 /* ============================================================
+   DEBUG SELECT
+============================================================ */
+.debug-select {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-left: auto;
+}
+
+.debug-person-select {
+  padding: 0.45rem 0.6rem;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--secondary-bg);
+  color: var(--fg);
+  font-size: 0.85rem;
+  max-width: 140px;
+}
+
+.btn-scan-debug {
+  padding: 0.45rem 0.75rem;
+  font-size: 0.85rem;
+  background: var(--success);
+}
+
+/* ============================================================
    MEAL SEARCH
 ============================================================ */
 .meal-search-wrap {
