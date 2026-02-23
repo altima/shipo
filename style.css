@@ -235,7 +235,7 @@ h2 { margin: 0 0 0.75rem 0; font-size: 1rem; font-weight: 700; }
    MEAL SEARCH
 ============================================================ */
 .meal-search-wrap {
-  padding: 0.4rem 0.75rem 0;
+  padding: 0.4rem 0.75rem 0.75rem;
 }
 
 .meal-search-input {
