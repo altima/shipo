@@ -69,7 +69,9 @@ async function fetchRemoteData() {
       if (Array.isArray(users) && users.length > 0) {
         users.forEach(function(u) {
           const existing = state.persons.find(function(p) {
-            return p.id === u.id || (u.uid && p.uid && p.uid === u.uid);
+            return p.id === u.id ||
+              (u.uid && p.uid && p.uid === u.uid) ||
+              (u.name && p.name && p.name.trim().toLowerCase() === u.name.trim().toLowerCase());
           });
           if (!existing) {
             state.persons.push({
@@ -78,8 +80,9 @@ async function fetchRemoteData() {
               uid:  u.uid  || null
             });
           } else {
-            if (u.name) existing.name = u.name;
-            if (u.uid)  existing.uid  = u.uid;
+            if (u.id && !existing.id)   existing.id   = u.id;
+            if (u.name)                 existing.name = u.name;
+            if (u.uid)                  existing.uid  = u.uid;
           }
         });
         updated = true;
